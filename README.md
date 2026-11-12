@@ -17,14 +17,17 @@ language. It will have three tools:
 
 ## Current status
 
-**Phase 1 (environment setup) is in place.** The site runs locally and has a
-homepage, a navigation bar, and one placeholder page for each tool. No AI is
-connected yet.
+**Phase 1 is done and Phase 2 is under way.** The site has a homepage,
+navigation, and a working Symptom Assistant chat screen. The chat sends
+messages to our server and shows a placeholder reply, because no AI is
+connected yet. The other two tools are still placeholder pages.
+
+Live site: https://medical-ai-assistant-slosh.vercel.app/
 
 | Phase | What gets built | Status |
 |-------|-----------------|--------|
 | 1 | Project setup, Flask app, homepage, navigation | Done |
-| 2 | Chat, upload and search interfaces (no AI yet) | Next |
+| 2 | Chat, upload and search interfaces (no AI yet) | In progress: chat done |
 | 3 | AI connection and the Symptom Assistant | Planned |
 | 4 | Document Explainer (PDF upload and explanation) | Planned |
 | 5 | Medication Assistant with trusted sources | Planned |
@@ -127,7 +130,7 @@ homepage. Press `Ctrl + C` in the terminal to stop the server.
 
 ```
 medical-ai-assistant/
-├── app.py                  The Flask app: starts the server and defines the page routes
+├── app.py                  The Flask app: starts the server, defines page routes and the /api/symptoms route
 ├── requirements.txt        The Python packages to install
 ├── .env.example            Template for private settings (placeholders only)
 ├── .gitignore              Files Git must never upload, such as .env
@@ -138,7 +141,7 @@ medical-ai-assistant/
 │   ├── __init__.py             Marks the folder as a Python package
 │   ├── ai_service.py           The one place that talks to the AI provider (Phase 3)
 │   ├── safety.py               Shared safety rules and disclaimers (Phase 3)
-│   ├── symptom_assistant.py    Symptom Assistant logic (Phase 3)
+│   ├── symptom_assistant.py    Checks chat messages; placeholder reply until Phase 3
 │   ├── document_explainer.py   PDF checking and text extraction (Phase 4)
 │   └── medication_assistant.py Medication lookup (Phase 5)
 │
@@ -152,6 +155,7 @@ medical-ai-assistant/
 ├── static/                 Files sent to the browser unchanged
 │   ├── css/style.css           All the styling
 │   ├── js/main.js              Shared JavaScript (the mobile menu)
+│   ├── js/symptoms.js          The Symptom Assistant chat
 │   ├── fonts/                  The typeface, bundled with the project
 │   └── images/favicon.svg      The icon in the browser tab
 │
@@ -164,9 +168,9 @@ Two things differ from the first sketch of the structure:
   footer once, and the other four pages build on it. Without it we would copy
   the same navigation into four files and have to update all four on every
   change.
-- **`static/js/symptoms.js`, `documents.js` and `medications.js` are not
-  created yet.** They arrive in Phase 2, when those pages have something
-  interactive to control.
+- **`static/js/documents.js` and `medications.js` are not created yet.**
+  They arrive later in Phase 2, when those pages have something interactive
+  to control.
 
 ## Keeping secrets safe
 

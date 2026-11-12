@@ -15,7 +15,9 @@ Then open http://127.0.0.1:5000 in your browser.
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template, request
+
+from backend import symptom_assistant
 
 # Read settings from a file named .env (if it exists) and make them available
 # through os.getenv(). The .env file holds private values such as API keys,
@@ -69,6 +71,37 @@ def documents():
 def medications():
     """Medication Assistant page (the search is added in Phases 2 and 5)."""
     return render_template("medications.html")
+
+
+# ---------------------------------------------------------------------------
+# API routes
+#
+# Page routes send back HTML for people to look at. API routes send back
+# JSON: plain data that our JavaScript reads and then displays.
+#
+# methods=["POST"] means this route only accepts POST requests, the kind a
+# browser uses to SEND data. Visiting the address directly (a GET request)
+# returns "405 Method Not Allowed".
+# ---------------------------------------------------------------------------
+
+
+@app.route("/api/symptoms", methods=["POST"])
+def symptoms_api():
+    """Receive the chat conversation and return the assistant's reply."""
+    # get_json() turns the JSON text sent by symptoms.js into Python data.
+    # silent=True gives us None instead of crashing if the body isn't JSON.
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="The request could not be read. Reload the page and try again."), 400
+
+    messages = data.get("messages")
+    error = symptom_assistant.validate_conversation(messages)
+    if error:
+        # 400 means "Bad Request": the problem is with what was sent.
+        return jsonify(error=error), 400
+
+    reply = symptom_assistant.get_reply(messages)
+    return jsonify(reply=reply)
 
 
 # This block only runs when we start the file directly with "python app.py".

@@ -1,11 +1,20 @@
 {% extends "base.html" %}
-<!-- symptoms.html - the Symptom Assistant page. The chat interface is added in Phase 2. -->
+<!--
+  symptoms.html - the Symptom Assistant page.
+  The chat's behaviour (sending, showing replies, clearing) lives in
+  static/js/symptoms.js. This file only defines the parts of the page.
+-->
 
 {% block title %}Symptom Assistant | {{ app_name }}{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/symptoms.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
 <section class="page">
-  <div class="container page-inner">
+  <div class="container">
+  <div class="chat-page">
     <h1>Symptom Assistant</h1>
     <p class="page-lead">
       Describe how you feel and get general information about possible
@@ -13,11 +22,48 @@
       professional.
     </p>
 
-    <div class="notice">
-      <h2>This tool is not ready yet</h2>
-      <p>The chat will appear on this page once we build it.</p>
-      <a class="button button-secondary" href="{{ url_for('home') }}">Back to home</a>
+    <!-- Shown above the chat so it is visible before anyone types. -->
+    <p class="urgent-note">
+      <strong>Chest pain, trouble breathing, signs of a stroke, or heavy bleeding?</strong>
+      Call 911 now instead of using this tool.
+    </p>
+
+    <div class="chat">
+      <div class="chat-header">
+        <h2>Conversation</h2>
+        <button class="button-text" type="button" id="clear-button" disabled>Clear conversation</button>
+      </div>
+
+      <!--
+        role="log" and aria-live="polite" make screen readers announce new
+        messages as they are added to this box.
+      -->
+      <div class="chat-log" id="chat-log" role="log" aria-live="polite" tabindex="0" aria-label="Conversation">
+        <div class="chat-empty" id="chat-empty">
+          <p>Say what you feel, where, how long it has lasted, and how bad it is.</p>
+        </div>
+      </div>
+
+      <!-- Error messages appear here. role="alert" makes screen readers read them out. -->
+      <p class="chat-error" id="chat-error" role="alert" hidden></p>
+
+      <form class="chat-form" id="chat-form">
+        <label class="visually-hidden" for="chat-input">Describe your symptoms</label>
+        <textarea
+          id="chat-input"
+          name="message"
+          rows="3"
+          maxlength="2000"
+          placeholder="For example: I've had a headache around my forehead for three days."
+        ></textarea>
+        <div class="chat-form-footer">
+          <span class="chat-hint" id="chat-hint">Press Enter to send, Shift + Enter for a new line.</span>
+          <span class="chat-count" id="chat-count" aria-live="polite">0 / 2000</span>
+          <button class="button button-primary" type="submit" id="send-button" disabled>Send</button>
+        </div>
+      </form>
     </div>
+  </div>
   </div>
 </section>
 {% endblock %}
