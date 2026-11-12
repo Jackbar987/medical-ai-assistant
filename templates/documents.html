@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+<!-- documents.html - the Document Explainer page. The PDF upload is added in Phase 2. -->
+
+{% block title %}Document Explainer | {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="container page-inner">
+    <h1>Medical Document Explainer</h1>
+    <p class="page-lead">
+      Upload a lab report or another medical PDF and get its terms,
+      abbreviations, and measurements explained in everyday words.
+    </p>
+
+    <div class="notice">
+      <h2>This tool is not ready yet</h2>
+      <p>The PDF upload will appear on this page once we build it.</p>
+      <a class="button button-secondary" href="{{ url_for('home') }}">Back to home</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

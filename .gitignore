@@ -1,0 +1,34 @@
+# Files listed here are never committed to GitHub.
+
+# Secrets: API keys and other private settings live in .env.
+# Share .env.example instead, which holds placeholders only.
+.env
+.env.*
+!.env.example
+
+# Python virtual environment (each teammate creates their own).
+venv/
+.venv/
+env/
+
+# Files Python generates automatically.
+__pycache__/
+*.pyc
+*.pyo
+
+# Uploaded documents may contain private medical information.
+# Keep the folder itself (via .gitkeep) but never its contents.
+uploads/*
+!uploads/.gitkeep
+
+# Flask's local data folder.
+instance/
+
+# Editor and operating system clutter.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Log files.
+*.log

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!--
+  base.html - the shared layout for every page.
+
+  The navigation bar, the disclaimer and the footer are written once, here.
+  Each page (index.html, symptoms.html, ...) starts with
+  "extends base.html" and only fills in the "block" sections below.
+  That way a change to the navigation only has to be made in this one file.
+
+  The double curly braces and the curly-brace-percent tags are Jinja, the
+  template language built into Flask. Flask replaces them with real values
+  before the page is sent to the browser.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Makes the page scale correctly on phones. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <meta name="description" content="Educational medical information explained in plain language.">
+  <!-- url_for('static', ...) builds the correct address of a file in the static folder. -->
+  <!-- The small icon shown in the browser tab. -->
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</head>
+<body>
+  <!-- Lets keyboard users jump straight past the navigation. -->
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('home') }}">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="9" fill="currentColor"/>
+          <path d="M16 9.5v13M9.5 16h13" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round"/>
+        </svg>
+        <span>{{ app_name }}</span>
+      </a>
+
+      <!-- Only shown on small screens. main.js opens and closes the menu. -->
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+
+      <!--
+        request.endpoint is the name of the Python function in app.py that
+        produced the current page. We use it to mark the current page's link.
+      -->
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <a href="{{ url_for('home') }}" {% if request.endpoint == 'home' %}aria-current="page"{% endif %}>Home</a>
+        <a href="{{ url_for('symptoms') }}" {% if request.endpoint == 'symptoms' %}aria-current="page"{% endif %}>Symptom Assistant</a>
+        <a href="{{ url_for('documents') }}" {% if request.endpoint == 'documents' %}aria-current="page"{% endif %}>Document Explainer</a>
+        <a href="{{ url_for('medications') }}" {% if request.endpoint == 'medications' %}aria-current="page"{% endif %}>Medication Assistant</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- The safety disclaimer appears on every page. -->
+  <section class="disclaimer" aria-labelledby="disclaimer-title">
+    <div class="container disclaimer-inner">
+      <div>
+        <h2 id="disclaimer-title">For learning, not for medical care</h2>
+        <p>
+          {{ app_name }} gives general educational information. It cannot
+          diagnose you, and it does not replace a doctor, a pharmacist, or
+          emergency services. Talk to a qualified healthcare professional
+          about your own situation.
+        </p>
+      </div>
+      <p class="emergency">
+        <strong>If this could be an emergency,</strong> stop and call 911
+        (in the United States) or your local emergency number.
+      </p>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>{{ app_name }} is a hackathon prototype. Please do not enter real patient records.</p>
+    </div>
+  </footer>
+</body>
+</html>

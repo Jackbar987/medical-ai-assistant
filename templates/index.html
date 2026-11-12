@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+<!-- index.html - the homepage. Everything inside "block content" is placed into base.html. -->
+
+{% block title %}{{ app_name }} | Medical information in plain language{% endblock %}
+
+{% block content %}
+
+<!-- Hero: the first thing visitors see. -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-text">
+      <h1>Medical information, explained in plain language.</h1>
+      <p class="hero-lead">
+        Describe a symptom, upload a lab report, or look up a medication.
+        {{ app_name }} explains what the medical terms mean and helps you
+        work out what to ask your doctor or pharmacist.
+      </p>
+      <a class="button button-primary" href="#tools">Get started</a>
+    </div>
+
+    <!-- A small example of what the app does: a report line turned into plain words. -->
+    <figure class="sample">
+      <div class="sample-report">
+        <p class="sample-heading">Blood test report</p>
+        <dl class="sample-rows">
+          <div class="sample-row is-highlighted">
+            <dt>Hemoglobin</dt>
+            <dd>14.2 g/dL</dd>
+          </div>
+          <div class="sample-row">
+            <dt>White blood cell count</dt>
+            <dd>7,000 cells/µL</dd>
+          </div>
+          <div class="sample-row">
+            <dt>Platelets</dt>
+            <dd>250,000 cells/µL</dd>
+          </div>
+        </dl>
+      </div>
+      <div class="sample-explanation">
+        <p class="sample-heading">In plain language</p>
+        <p>
+          Hemoglobin is the protein in red blood cells that carries oxygen
+          around your body. This report lists 14.2 g/dL. Whether that is in
+          the expected range depends on the reference range your lab prints.
+        </p>
+      </div>
+      <figcaption>An example with made-up values.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- The three feature cards. -->
+<section class="tools" id="tools" aria-labelledby="tools-title">
+  <div class="container">
+    <h2 id="tools-title">Choose a tool</h2>
+
+    <div class="card-grid">
+
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A2.5 2.5 0 0 1 4 13.5z"/>
+          <path d="M8 8h8M8 11.5h5"/>
+        </svg>
+        <h3>Symptom Assistant</h3>
+        <p>
+          Describe how you feel and get general information about possible
+          causes, along with the warning signs that mean you should see a
+          professional.
+        </p>
+        <a class="button button-secondary" href="{{ url_for('symptoms') }}">Open Symptom Assistant</a>
+      </article>
+
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+          <path d="M14 3v5h5M9 13h6M9 17h6"/>
+        </svg>
+        <h3>Medical Document Explainer</h3>
+        <p>
+          Upload a lab report or another medical PDF and get its terms,
+          abbreviations, and measurements explained in everyday words.
+        </p>
+        <a class="button button-secondary" href="{{ url_for('documents') }}">Open Document Explainer</a>
+      </article>
+
+      <article class="card">
+        <svg class="card-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-45 12 12)"/>
+          <path d="M9.2 9.2l5.6 5.6"/>
+        </svg>
+        <h3>Medication Assistant</h3>
+        <p>
+          Look up a medication to learn what it is generally used for, its
+          common side effects, and the precautions to know about.
+        </p>
+        <a class="button button-secondary" href="{{ url_for('medications') }}">Open Medication Assistant</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,544 @@
+/*
+  style.css - the appearance of every page.
+
+  HTML says WHAT is on the page; this file says how it LOOKS.
+  The file is organised from general to specific:
+
+    1. Font
+    2. Design tokens (colours, spacing and other values we reuse)
+    3. Base styles (applied to plain HTML elements)
+    4. Layout helper and buttons
+    5. Header and navigation
+    6. Homepage: hero
+    7. Homepage: feature cards
+    8. Feature pages
+    9. Disclaimer and footer
+   10. Small screens
+*/
+
+/* ---------- 1. Font ----------
+   Atkinson Hyperlegible Next was designed with the Braille Institute so that
+   letters and numbers are hard to confuse, which suits medical values.
+   The font files live in static/fonts, so the site makes no requests to
+   outside servers and still looks right without an internet connection. */
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("../fonts/atkinson-hyperlegible-next-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("../fonts/atkinson-hyperlegible-next-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* ---------- 2. Design tokens ----------
+   These are CSS variables. We define each colour once and reuse it with
+   var(--name), so changing a colour here changes it everywhere. */
+
+:root {
+  --navy: #14294d;        /* primary colour: headings, main buttons */
+  --navy-deep: #0d1c38;   /* darker navy for hover states */
+  --teal: #0b7a6f;        /* accent colour: icons, highlights, focus rings */
+  --teal-tint: #e2f2ef;   /* very light teal for backgrounds */
+  --page: #f4f6f9;        /* light gray page background */
+  --surface: #ffffff;     /* white cards and header */
+  --line: #d9e0ea;        /* borders */
+  --text: #1c2a40;        /* body text */
+  --muted: #52607a;       /* secondary text */
+  --alert-bg: #fff3d9;    /* emergency notice background */
+  --alert-text: #5c3a00;  /* emergency notice text */
+
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 18px;
+
+  --shadow-card: 0 1px 2px rgba(20, 41, 77, 0.05), 0 10px 28px rgba(20, 41, 77, 0.07);
+
+  --font: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* ---------- 3. Base styles ---------- */
+
+/* Makes width and height include padding and borders, which is easier to reason about. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1.0625rem; /* 17px: slightly larger than default for readability */
+  line-height: 1.6;
+
+  /* Stack header, main content and footer in a column that is at least as
+     tall as the screen, so the footer sits at the bottom on short pages. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* The main content takes up any spare height. */
+main {
+  flex: 1;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--navy);
+  line-height: 1.15;
+}
+
+h1 {
+  font-size: clamp(2.25rem, 5vw, 3.4rem); /* grows with the screen, within limits */
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+}
+
+h2 {
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--navy);
+}
+
+/* A clearly visible outline for people who navigate with the keyboard. */
+:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Hidden until a keyboard user presses Tab, then it appears at the top. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 10;
+  padding: 0.6rem 1rem;
+  background: var(--navy);
+  color: #ffffff;
+  border-radius: var(--radius-small);
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Smooth scrolling for the "Get started" button, unless the visitor has
+   asked their device to reduce motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------- 4. Layout helper and buttons ---------- */
+
+/* Centres content and stops it from becoming too wide on large screens. */
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.8rem 1.4rem;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-medium);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.button-primary {
+  background: var(--navy);
+  color: #ffffff;
+}
+
+.button-primary:hover {
+  background: var(--navy-deep);
+  border-color: var(--navy-deep);
+}
+
+.button-secondary {
+  background: var(--surface);
+  color: var(--navy);
+}
+
+.button-secondary:hover {
+  background: var(--navy);
+  color: #ffffff;
+}
+
+/* ---------- 5. Header and navigation ---------- */
+
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--navy);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 2rem;
+  height: 2rem;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.site-nav a {
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-small);
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  background: var(--page);
+  color: var(--navy);
+}
+
+/* The link for the page you are currently on. */
+.site-nav a[aria-current="page"] {
+  background: var(--teal-tint);
+  color: var(--navy);
+}
+
+/* The Menu button is hidden on wide screens (see section 10). */
+.nav-toggle {
+  display: none;
+  padding: 0.5rem 0.9rem;
+  border: 2px solid var(--navy);
+  border-radius: var(--radius-small);
+  background: var(--surface);
+  color: var(--navy);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- 6. Homepage: hero ---------- */
+
+.hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+/* CSS grid places the text and the example side by side. */
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 4rem;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.hero-lead {
+  max-width: 34rem;
+  margin: 1.5rem 0 2rem;
+  color: var(--muted);
+  font-size: 1.2rem;
+}
+
+/* The example: a report line and its plain-language explanation. */
+.sample {
+  margin: 0;
+}
+
+.sample-report,
+.sample-explanation {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-large);
+  padding: 1.25rem;
+}
+
+.sample-report {
+  background: var(--page);
+}
+
+.sample-heading {
+  margin-bottom: 0.6rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.sample-rows {
+  margin: 0;
+}
+
+.sample-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-small);
+}
+
+.sample-row dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums; /* digits line up in columns */
+  white-space: nowrap;
+}
+
+/* The row being explained. */
+.sample-row.is-highlighted {
+  background: var(--surface);
+  box-shadow: inset 4px 0 0 var(--teal), 0 0 0 1px var(--line);
+  color: var(--navy);
+  font-weight: 700;
+}
+
+/* The explanation sits lower and to the right, joined by a short line. */
+.sample-explanation {
+  position: relative;
+  margin: 1rem 0 0 2.5rem;
+  background: var(--teal-tint);
+  border-color: #b9ddd7;
+}
+
+.sample-explanation::before {
+  content: "";
+  position: absolute;
+  left: 2rem;
+  top: -1rem;
+  width: 2px;
+  height: 1rem;
+  background: var(--teal);
+}
+
+.sample-explanation .sample-heading {
+  color: var(--teal);
+}
+
+.sample figcaption {
+  margin: 0.75rem 0 0 2.5rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ---------- 7. Homepage: feature cards ---------- */
+
+.tools {
+  padding: 4.5rem 0 5rem;
+}
+
+/* Three equal columns. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Each card is a column, so the button can sit at the bottom. */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.75rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+.card-icon {
+  width: 3rem;
+  height: 3rem;
+  padding: 0.7rem;
+  margin-bottom: 1.25rem;
+  background: var(--teal-tint);
+  border-radius: var(--radius-medium);
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.card p {
+  margin: 0.6rem 0 1.5rem;
+  color: var(--muted);
+}
+
+/* margin-top: auto pushes the button to the bottom of the card. */
+.card .button {
+  margin-top: auto;
+}
+
+/* ---------- 8. Feature pages ---------- */
+
+.page {
+  padding: 4rem 0 5rem;
+}
+
+.page h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.page-lead {
+  max-width: 38rem;
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+/* The "not ready yet" box. */
+.notice {
+  max-width: 38rem;
+  margin-top: 2.5rem;
+  padding: 1.75rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-large);
+}
+
+.notice h2 {
+  font-size: 1.3rem;
+}
+
+.notice p {
+  margin: 0.5rem 0 1.5rem;
+  color: var(--muted);
+}
+
+/* ---------- 9. Disclaimer and footer ---------- */
+
+.disclaimer {
+  background: var(--navy);
+  color: #e6ebf3;
+}
+
+.disclaimer-inner {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  align-items: center;
+  gap: 3rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.disclaimer h2 {
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  font-size: 1.5rem;
+}
+
+.disclaimer p {
+  max-width: 36rem;
+}
+
+.disclaimer .emergency {
+  padding: 1.25rem 1.4rem;
+  background: var(--alert-bg);
+  border-radius: var(--radius-medium);
+  color: var(--alert-text);
+}
+
+.site-footer {
+  padding: 1.5rem 0;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ---------- 10. Small screens ----------
+   A media query applies its rules only when the condition is true.
+   These rules rearrange the page for tablets and phones. */
+
+@media (max-width: 900px) {
+  /* Stack the hero and disclaimer into one column. */
+  .hero-inner,
+  .disclaimer-inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .hero-inner {
+    padding-top: 3rem;
+    padding-bottom: 3.5rem;
+  }
+
+  /* One card per row. */
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Show the Menu button and hide the links until it is clicked.
+     The "js" class is added by main.js, so the links stay visible if
+     JavaScript is not running. */
+  .js .nav-toggle {
+    display: block;
+  }
+
+  .js .site-nav {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+  }
+
+  .js .site-nav.is-open {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .sample-explanation,
+  .sample figcaption {
+    margin-left: 1rem;
+  }
+
+  .sample-explanation::before {
+    left: 1.5rem;
+  }
+}

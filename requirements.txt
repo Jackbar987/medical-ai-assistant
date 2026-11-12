@@ -1,0 +1,10 @@
+# Python packages this project needs.
+# Install them all with:  pip install -r requirements.txt
+#
+# Each line pins an exact version so every teammate gets the same code.
+
+# Flask: the web framework that receives requests and returns pages.
+Flask==3.1.3
+
+# python-dotenv: loads settings (such as API keys) from the .env file.
+python-dotenv==1.2.4
