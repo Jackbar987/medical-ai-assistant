@@ -23,6 +23,8 @@
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  <!-- Pages that need their own JavaScript add it here. -->
+  {% block scripts %}{% endblock %}
 </head>
 <body>
   <!-- Lets keyboard users jump straight past the navigation. -->
