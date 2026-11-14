@@ -64,6 +64,12 @@
 
 /* ---------- 3. Base styles ---------- */
 
+/* Make sure anything with the "hidden" attribute stays hidden, even when a
+   class below gives it display: flex or inline-block. */
+[hidden] {
+  display: none !important;
+}
+
 /* Makes width and height include padding and borders, which is easier to reason about. */
 *,
 *::before,
@@ -600,10 +606,6 @@ a {
 
 .chat-error {
   margin: 0 1.25rem 0.75rem;
-  padding: 0.75rem 1rem;
-  background: #fde8e8;
-  border-radius: var(--radius-medium);
-  color: #8a1c1c;
 }
 
 /* The typing area at the bottom. */
@@ -671,6 +673,261 @@ a {
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---------- 8c. Document Explainer ---------- */
+
+/* Same reading width as the chat page. */
+.narrow-page {
+  max-width: 46rem;
+}
+
+/* A neutral note (the urgent note above the chat uses amber instead). */
+.info-note {
+  margin-top: 1.5rem;
+  padding: 0.9rem 1.1rem;
+  background: var(--teal-tint);
+  border-radius: var(--radius-medium);
+}
+
+.info-note a {
+  font-weight: 700;
+}
+
+/* A white box that groups one step of the page. */
+.panel {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-card);
+}
+
+.panel h2 {
+  font-size: 1.25rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Headings that receive focus from JavaScript don't need a visible ring. */
+.panel h2[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* The dashed area files can be dropped onto. */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 2rem 1.25rem;
+  border: 2px dashed #b4c0d1;
+  border-radius: var(--radius-large);
+  background: var(--page);
+  text-align: center;
+}
+
+/* Highlight while a file is dragged over it. */
+.dropzone.is-dragging {
+  border-color: var(--teal);
+  background: var(--teal-tint);
+}
+
+/* The hidden file input sits inside the drop area, so show a focus ring on
+   the "Choose a PDF" button when keyboard users reach the input. */
+.dropzone:focus-within label {
+  outline: 3px solid var(--teal);
+  outline-offset: 3px;
+}
+
+.dropzone-icon,
+.file-card-icon {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dropzone-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.dropzone-title {
+  margin-bottom: 0.75rem;
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.dropzone-hint {
+  margin-top: 0.9rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* The chosen file. */
+.file-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+}
+
+.file-card-icon {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+/* min-width: 0 lets long file names shrink and wrap instead of overflowing. */
+.file-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name {
+  color: var(--navy);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.file-size {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Upload progress bar. */
+.progress {
+  margin-top: 1rem;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+  height: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.progress-bar {
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--teal);
+}
+
+/* Once uploaded, the bar gently pulses while the server reads the file. */
+@media (prefers-reduced-motion: no-preference) {
+  .progress.is-processing .progress-bar {
+    animation: processing-pulse 1.4s infinite ease-in-out;
+  }
+}
+
+@keyframes processing-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* Error messages on forms (shared style with the chat). */
+.form-error,
+.chat-error {
+  padding: 0.75rem 1rem;
+  background: #fde8e8;
+  border-radius: var(--radius-medium);
+  color: #8a1c1c;
+}
+
+.form-error {
+  margin-top: 1rem;
+}
+
+.panel > .button {
+  margin-top: 1.25rem;
+}
+
+/* The explanation text. */
+.explanation {
+  margin-top: 1rem;
+  white-space: pre-wrap;
+}
+
+.questions-title {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  font-size: 1.1rem;
+}
+
+.qa-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.qa-list:empty {
+  display: none;
+}
+
+.qa-item {
+  padding-left: 1rem;
+  border-left: 3px solid var(--teal);
+}
+
+.qa-question {
+  color: var(--navy);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.qa-answer {
+  margin-top: 0.25rem;
+  white-space: pre-wrap;
+}
+
+.qa-answer.is-loading {
+  color: var(--muted);
+}
+
+.question-form {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.question-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  background: var(--page);
+  color: var(--text);
+  font: inherit;
+}
+
+.question-form input:focus {
+  background: var(--surface);
+  border-color: var(--teal);
 }
 
 /* ---------- 9. Disclaimer and footer ---------- */

@@ -17,7 +17,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 
-from backend import symptom_assistant
+from backend import document_explainer, symptom_assistant
 
 # Read settings from a file named .env (if it exists) and make them available
 # through os.getenv(). The .env file holds private values such as API keys,
@@ -28,6 +28,11 @@ load_dotenv()
 # the "templates" folder and for CSS, JavaScript, fonts and images in the
 # "static" folder.
 app = Flask(__name__)
+
+# Refuse any request larger than 4.5 MB before reading it. That leaves room
+# for a 4 MB PDF plus the extra bytes the browser adds around a file upload.
+# Bigger requests get the "413 Payload Too Large" error handled further down.
+app.config["MAX_CONTENT_LENGTH"] = int(4.5 * 1024 * 1024)
 
 # The name shown in the navigation bar and in browser tabs.
 # Change it here and it changes on every page.
@@ -102,6 +107,43 @@ def symptoms_api():
 
     reply = symptom_assistant.get_reply(messages)
     return jsonify(reply=reply)
+
+
+@app.route("/api/documents/explain", methods=["POST"])
+def documents_explain_api():
+    """Receive an uploaded PDF and return an explanation of it."""
+    # Uploaded files arrive in request.files, under the name the browser
+    # gave them. documents.js sends the PDF with the name "document".
+    uploaded_file = request.files.get("document")
+
+    pdf_bytes, error = document_explainer.read_uploaded_pdf(uploaded_file)
+    if error:
+        return jsonify(error=error), 400
+
+    explanation = document_explainer.get_explanation(pdf_bytes)
+    return jsonify(explanation=explanation)
+
+
+@app.route("/api/documents/ask", methods=["POST"])
+def documents_ask_api():
+    """Answer a follow-up question about the uploaded document."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="The request could not be read. Reload the page and try again."), 400
+
+    question = data.get("question")
+    error = document_explainer.validate_question(question)
+    if error:
+        return jsonify(error=error), 400
+
+    answer = document_explainer.answer_question(question)
+    return jsonify(answer=answer)
+
+
+@app.errorhandler(413)
+def request_too_large(error):
+    """Reply in JSON when a request is bigger than MAX_CONTENT_LENGTH."""
+    return jsonify(error="This file is larger than 4 MB. Choose a smaller PDF."), 413
 
 
 # This block only runs when we start the file directly with "python app.py".
