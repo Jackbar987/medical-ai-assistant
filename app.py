@@ -17,7 +17,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 
-from backend import document_explainer, symptom_assistant
+from backend import document_explainer, medication_assistant, symptom_assistant
 
 # Read settings from a file named .env (if it exists) and make them available
 # through os.getenv(). The .env file holds private values such as API keys,
@@ -137,6 +137,41 @@ def documents_ask_api():
         return jsonify(error=error), 400
 
     answer = document_explainer.answer_question(question)
+    return jsonify(answer=answer)
+
+
+@app.route("/api/medications/search", methods=["POST"])
+def medications_search_api():
+    """Look up a medication by name."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="The request could not be read. Reload the page and try again."), 400
+
+    name, error = medication_assistant.clean_medication_name(data.get("name"))
+    if error:
+        return jsonify(error=error), 400
+
+    result = medication_assistant.look_up(name)
+    return jsonify(result)
+
+
+@app.route("/api/medications/ask", methods=["POST"])
+def medications_ask_api():
+    """Answer a follow-up question about a medication."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="The request could not be read. Reload the page and try again."), 400
+
+    name, error = medication_assistant.clean_medication_name(data.get("medication"))
+    if error:
+        return jsonify(error="Search for a medication before asking a question."), 400
+
+    question = data.get("question")
+    error = medication_assistant.validate_question(question)
+    if error:
+        return jsonify(error=error), 400
+
+    answer = medication_assistant.answer_question(name, question)
     return jsonify(answer=answer)
 
 
