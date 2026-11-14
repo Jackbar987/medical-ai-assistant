@@ -18,16 +18,17 @@ language. It will have three tools:
 ## Current status
 
 **Phase 1 is done and Phase 2 is under way.** The site has a homepage,
-navigation, and a working Symptom Assistant chat screen. The chat sends
-messages to our server and shows a placeholder reply, because no AI is
-connected yet. The other two tools are still placeholder pages.
+navigation, a working Symptom Assistant chat screen, and a working
+Document Explainer upload screen. Both send data to our server and show
+placeholder replies, because no AI is connected yet. The Medication
+Assistant is still a placeholder page.
 
 Live site: https://medical-ai-assistant-slosh.vercel.app/
 
 | Phase | What gets built | Status |
 |-------|-----------------|--------|
 | 1 | Project setup, Flask app, homepage, navigation | Done |
-| 2 | Chat, upload and search interfaces (no AI yet) | In progress: chat done |
+| 2 | Chat, upload and search interfaces (no AI yet) | In progress: chat and upload done |
 | 3 | AI connection and the Symptom Assistant | Planned |
 | 4 | Document Explainer (PDF upload and explanation) | Planned |
 | 5 | Medication Assistant with trusted sources | Planned |
@@ -130,7 +131,7 @@ homepage. Press `Ctrl + C` in the terminal to stop the server.
 
 ```
 medical-ai-assistant/
-├── app.py                  The Flask app: starts the server, defines page routes and the /api/symptoms route
+├── app.py                  The Flask app: starts the server, defines page routes and the /api/... routes
 ├── requirements.txt        The Python packages to install
 ├── .env.example            Template for private settings (placeholders only)
 ├── .gitignore              Files Git must never upload, such as .env
@@ -142,7 +143,7 @@ medical-ai-assistant/
 │   ├── ai_service.py           The one place that talks to the AI provider (Phase 3)
 │   ├── safety.py               Shared safety rules and disclaimers (Phase 3)
 │   ├── symptom_assistant.py    Checks chat messages; placeholder reply until Phase 3
-│   ├── document_explainer.py   PDF checking and text extraction (Phase 4)
+│   ├── document_explainer.py   Checks uploaded PDFs; placeholder explanation until Phase 4
 │   └── medication_assistant.py Medication lookup (Phase 5)
 │
 ├── templates/              HTML pages, filled in by Flask
@@ -156,10 +157,12 @@ medical-ai-assistant/
 │   ├── css/style.css           All the styling
 │   ├── js/main.js              Shared JavaScript (the mobile menu)
 │   ├── js/symptoms.js          The Symptom Assistant chat
+│   ├── js/documents.js         The Document Explainer upload and questions
 │   ├── fonts/                  The typeface, bundled with the project
+│   ├── samples/                A fictional blood test report PDF for demos and testing
 │   └── images/favicon.svg      The icon in the browser tab
 │
-└── uploads/                Temporary home for uploaded PDFs (contents are never committed)
+└── uploads/                Not used: uploaded PDFs are read in memory and never saved
 ```
 
 Two things differ from the first sketch of the structure:
@@ -168,9 +171,17 @@ Two things differ from the first sketch of the structure:
   footer once, and the other four pages build on it. Without it we would copy
   the same navigation into four files and have to update all four on every
   change.
-- **`static/js/documents.js` and `medications.js` are not created yet.**
-  They arrive later in Phase 2, when those pages have something interactive
-  to control.
+- **`static/js/medications.js` is not created yet.** It arrives later in
+  Phase 2, when the Medication Assistant page has something interactive.
+- **Uploaded PDFs are never written to `uploads/`.** The server reads each
+  file in memory and forgets it after the request. That is better for
+  privacy, and Vercel has no permanent disk anyway.
+
+## Testing with sample documents
+
+Never upload real medical records to this prototype. Use the fictional
+report in `static/samples/sample-blood-test-report.pdf`, which the Document
+Explainer page also links to. Every name and value in it is made up.
 
 ## Keeping secrets safe
 

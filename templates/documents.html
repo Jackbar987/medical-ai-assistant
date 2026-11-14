@@ -1,22 +1,101 @@
 {% extends "base.html" %}
-<!-- documents.html - the Document Explainer page. The PDF upload is added in Phase 2. -->
+<!--
+  documents.html - the Document Explainer page.
+  The behaviour (choosing, uploading, showing the explanation, questions)
+  lives in static/js/documents.js. This file only defines the parts.
+-->
 
 {% block title %}Document Explainer | {{ app_name }}{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/documents.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
 <section class="page">
-  <div class="container page-inner">
+  <div class="container">
+  <div class="narrow-page">
     <h1>Medical Document Explainer</h1>
     <p class="page-lead">
       Upload a lab report or another medical PDF and get its terms,
       abbreviations, and measurements explained in everyday words.
     </p>
 
-    <div class="notice">
-      <h2>This tool is not ready yet</h2>
-      <p>The PDF upload will appear on this page once we build it.</p>
-      <a class="button button-secondary" href="{{ url_for('home') }}">Back to home</a>
+    <p class="info-note">
+      <strong>Please use sample documents only.</strong>
+      This is a prototype, so don't upload real medical records. You can try
+      it with our <a href="{{ url_for('static', filename='samples/sample-blood-test-report.pdf') }}" download>sample blood test report</a>,
+      which contains made-up values.
+    </p>
+
+    <!-- Step 1: choose and upload a file. -->
+    <div class="panel" id="upload-panel">
+      <h2>Your document</h2>
+
+      <!-- The drop area. The real file picker is the hidden input; the label
+           styled as a button opens it, and it also works with the keyboard. -->
+      <div class="dropzone" id="dropzone">
+        <input class="visually-hidden" type="file" id="file-input" accept=".pdf,application/pdf">
+        <svg class="dropzone-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+          <path d="M14 3v5h5M12 17v-6M9.5 13.5 12 11l2.5 2.5"/>
+        </svg>
+        <p class="dropzone-title">Drag a PDF here, or</p>
+        <label class="button button-secondary" for="file-input">Choose a PDF</label>
+        <p class="dropzone-hint">Text-based PDF files up to 4 MB. Scanned images can't be read yet.</p>
+      </div>
+
+      <!-- Shown once a file is chosen. Nothing is uploaded until "Explain document" is pressed. -->
+      <div class="file-card" id="file-card" hidden>
+        <svg class="file-card-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
+          <path d="M14 3v5h5"/>
+        </svg>
+        <div class="file-card-text">
+          <p class="file-name" id="file-name"></p>
+          <p class="file-size" id="file-size"></p>
+        </div>
+        <button class="button-text" type="button" id="remove-file">Remove</button>
+      </div>
+
+      <!-- Upload progress. -->
+      <div class="progress" id="progress" hidden>
+        <div class="progress-label">
+          <span id="progress-text">Uploading</span>
+          <span id="progress-percent"></span>
+        </div>
+        <div class="progress-track" id="progress-track" role="progressbar" aria-labelledby="progress-text" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      </div>
+
+      <p class="form-error" id="upload-error" role="alert" hidden></p>
+
+      <button class="button button-primary" type="button" id="explain-button" disabled>Explain document</button>
     </div>
+
+    <!-- Step 2: the explanation and follow-up questions. Hidden until a document is explained. -->
+    <div class="panel" id="result-panel" hidden>
+      <div class="panel-header">
+        <h2 id="explanation-title" tabindex="-1">Explanation</h2>
+        <button class="button-text" type="button" id="clear-document">Clear document</button>
+      </div>
+
+      <div class="explanation" id="explanation"></div>
+
+      <h3 class="questions-title">Ask about this document</h3>
+      <div class="qa-list" id="qa-list" aria-live="polite"></div>
+
+      <form class="question-form" id="question-form">
+        <label class="visually-hidden" for="question-input">Your question about this document</label>
+        <input type="text" id="question-input" maxlength="1000" autocomplete="off"
+               placeholder="Example: What does g/dL mean?">
+        <button class="button button-primary" type="submit" id="ask-button" disabled>Ask</button>
+      </form>
+
+      <p class="form-error" id="question-error" role="alert" hidden></p>
+    </div>
+  </div>
   </div>
 </section>
 {% endblock %}
