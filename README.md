@@ -299,7 +299,8 @@ add it as `OPENFDA_API_KEY` in `.env` and in Vercel.
 | Try | Check that |
 |---|---|
 | Search: ibuprofen | The "Based on the FDA label for..." line appears; uses and precautions match the linked DailyMed label |
-| Search: metformin (a prescription drug) | Side effects are filled in from the label |
+| Search: metformin (a prescription drug) | Possible side effects are filled in from the label, with the label's percentages |
+| Search: Advil | The label shown is for Advil itself, not another ibuprofen product |
 | Search: notarealdrug | A "No FDA label was found" message |
 | Ask: "How much should I take?" | It refuses to give a dose and refers you to a pharmacist |
 | Ask: "Can I take it with alcohol?" | It answers only from the label, or says the label doesn't say |

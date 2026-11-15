@@ -158,6 +158,18 @@ def _names(label, field):
     return [n for n in label.get("openfda", {}).get(field, []) if isinstance(n, str)]
 
 
+# Words that usually mean a company repackages or relabels medicines made by
+# someone else. Their labels are official copies, but the original
+# manufacturer's label is clearer to show, so repackagers rank a bit lower.
+# The second line lists some large repackagers whose names don't contain those
+# words. It doesn't need to be complete: it only nudges the ranking.
+REPACKAGER_WORDS = re.compile(
+    r"repack|re-pack|packag|relabel|exchange service|distribut"
+    r"|medication solutions|proficient rx|quality care|preferred pharmaceuticals|nucare|direct[ _]?rx|aphena",
+    re.IGNORECASE,
+)
+
+
 def _score(label, name):
     """
     Give a label points for how well it fits, so we can pick the best one.
@@ -166,13 +178,23 @@ def _score(label, name):
     wanted = name.lower()
     generic = [n.lower() for n in _names(label, "generic_name")]
     brand = [n.lower() for n in _names(label, "brand_name")]
+    manufacturer = " ".join(_names(label, "manufacturer_name"))
     score = 0
-    if wanted in generic or wanted in brand:
-        score += 10  # an exact name match is best
+
+    # The person typed a brand name, such as "Advil": prefer that brand's own
+    # label over other products that contain the same ingredient.
+    if wanted in brand and wanted not in generic:
+        score += 12
+    # An exact generic name match, such as "ibuprofen".
+    elif wanted in generic or wanted in brand:
+        score += 10
+
     if label.get("indications_and_usage") or label.get("purpose"):
         score += 5   # it says what the medicine is for
     if label.get("adverse_reactions") or label.get("warnings") or label.get("warnings_and_cautions"):
         score += 3   # it has safety information
+    if REPACKAGER_WORDS.search(manufacturer):
+        score -= 3   # prefer the original manufacturer's label
     return score
 
 
