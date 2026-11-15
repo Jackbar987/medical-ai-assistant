@@ -1,7 +1,7 @@
 """
 document_explainer.py - logic for the Medical Document Explainer.
 
-How a document is explained (Phase 4):
+How a document is explained:
 1. read_uploaded_pdf() checks the upload (type, size, real PDF).
 2. extract_text() pulls the text out of the PDF with PyMuPDF, keeping
    each line of a table together (see _page_lines below).

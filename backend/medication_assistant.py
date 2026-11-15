@@ -1,7 +1,7 @@
 """
 medication_assistant.py - logic for the Medication Information Assistant.
 
-How a search works (Phase 5):
+How a search works:
 1. clean_medication_name() checks what the person typed.
 2. find_label() asks openFDA (the U.S. Food and Drug Administration's free
    public data service) for the official drug label of that medication.

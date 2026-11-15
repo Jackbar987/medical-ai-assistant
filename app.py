@@ -62,19 +62,19 @@ def home():
 
 @app.route("/symptoms")
 def symptoms():
-    """Symptom Assistant page (the chat is added in Phases 2 and 3)."""
+    """Symptom Assistant page: the chat."""
     return render_template("symptoms.html")
 
 
 @app.route("/documents")
 def documents():
-    """Document Explainer page (the PDF upload is added in Phases 2 and 4)."""
+    """Document Explainer page: upload a PDF or paste text."""
     return render_template("documents.html")
 
 
 @app.route("/medications")
 def medications():
-    """Medication Assistant page (the search is added in Phases 2 and 5)."""
+    """Medication Assistant page: search FDA drug labels."""
     return render_template("medications.html")
 
 

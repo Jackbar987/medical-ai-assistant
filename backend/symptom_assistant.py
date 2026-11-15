@@ -13,7 +13,7 @@ The server keeps no memory between requests. This is deliberate: nothing
 about the user's health is stored, and it works on serverless hosting like
 Vercel, where each request may be handled by a fresh copy of the app.
 
-How a reply is made (Phase 3):
+How a reply is made:
 1. safety.check_message() looks at the newest message for signs of an
    emergency or crisis. If it finds one, we answer with fixed emergency
    guidance and don't ask the AI at all.

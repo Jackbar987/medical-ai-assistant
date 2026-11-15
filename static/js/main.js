@@ -1,11 +1,11 @@
 /*
   main.js - JavaScript shared by every page.
 
-  For now it does one job: on small screens it opens and closes the
-  navigation menu when the "Menu" button is clicked.
+  It does one job: on small screens it opens and closes the navigation
+  menu when the "Menu" button is clicked.
 
-  Feature-specific scripts (symptoms.js, documents.js, medications.js) are
-  added in Phase 2, when those pages get interactive parts.
+  Each tool also has its own script: symptoms.js, documents.js and
+  medications.js.
 */
 
 // Tell the CSS that JavaScript is working. The menu is only collapsed on
