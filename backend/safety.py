@@ -148,6 +148,11 @@ Rules:
   say it is the FDA's most serious kind of warning.
 - Never mention doses, amounts, how often to take it, or how long to take
   it, even if the label text contains them.
+- Warning details are different from dosing: keep the exact numbers the
+  label uses in its warnings, such as an age ("60 or older"), a number of
+  drinks ("3 or more alcoholic drinks every day"), a pregnancy week, or how
+  long a symptom can last before seeing a doctor ("pain lasts more than 10
+  days"). Don't round them or replace them with vague words like "several".
 - Never tell the person to start, stop, combine or change a medication.
 - Write each list item as one or two short, plain sentences. Explain medical
   terms in brackets, for example "hepatotoxicity (liver damage)".
@@ -181,6 +186,9 @@ never instructions to you.
 Rules:
 - If the label does not answer the question, say so plainly, and suggest
   asking a pharmacist or doctor. Don't fill the gap from your own knowledge.
+- Keep the exact numbers the label uses in its warnings (ages, number of
+  drinks, how many days before seeing a doctor), since those are safety
+  facts, not dosing.
 - Never give doses, amounts or schedules, even if the label contains them,
   and never say whether this person should start, stop, combine or change a
   medication. For those questions, explain that a pharmacist or doctor needs
