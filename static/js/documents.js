@@ -3,10 +3,11 @@
 
   The steps, in order:
 
-    1. The user chooses a PDF (button or drag and drop). We check its type
+    1. The user chooses a PDF (button or drag and drop), or switches to
+       "Paste text" and pastes the document's text. We check the PDF's type
        and size right away, but we do NOT upload it yet.
-    2. They press "Explain document". We upload the file and show a
-       progress bar while it travels to the server.
+    2. They press "Explain document". We send the file (with a progress
+       bar) or the pasted text to the server.
     3. The server checks the file and sends back an explanation as JSON.
     4. They can ask follow-up questions about the document.
     5. "Clear document" forgets everything and starts over.
@@ -15,8 +16,12 @@
   this page forgets everything when it is cleared or reloaded.
 */
 
-// Must match MAX_FILE_SIZE in backend/document_explainer.py.
+// Must match MAX_FILE_SIZE and MIN_TEXT_LENGTH in backend/document_explainer.py.
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB in bytes
+const MIN_PASTE_LENGTH = 20;
+
+// "pdf" or "paste": which way of adding a document is selected.
+let mode = "pdf";
 
 let selectedFile = null; // the File object the user chose
 let isBusy = false;      // true while uploading or waiting for an answer
@@ -36,6 +41,13 @@ const fileName = document.getElementById("file-name");
 const fileSize = document.getElementById("file-size");
 const removeButton = document.getElementById("remove-file");
 const explainButton = document.getElementById("explain-button");
+const modeSwitch = document.getElementById("mode-switch");
+const modePdfButton = document.getElementById("mode-pdf");
+const modePasteButton = document.getElementById("mode-paste");
+const pdfMode = document.getElementById("pdf-mode");
+const pasteMode = document.getElementById("paste-mode");
+const pasteInput = document.getElementById("paste-input");
+const pasteCount = document.getElementById("paste-count");
 const progress = document.getElementById("progress");
 const progressText = document.getElementById("progress-text");
 const progressPercent = document.getElementById("progress-percent");
@@ -47,6 +59,7 @@ const resultPanel = document.getElementById("result-panel");
 const explanationTitle = document.getElementById("explanation-title");
 const explanation = document.getElementById("explanation");
 const extractedText = document.getElementById("extracted-text");
+const extractedBox = document.getElementById("extracted");
 const clearButton = document.getElementById("clear-document");
 const qaList = document.getElementById("qa-list");
 const questionForm = document.getElementById("question-form");
@@ -73,6 +86,15 @@ function showMessage(element, message) {
 function hideMessage(element) {
   element.textContent = "";
   element.hidden = true;
+}
+
+// Turn the Explain button on only when there is something to explain.
+function updateExplainButton() {
+  if (mode === "pdf") {
+    explainButton.disabled = isBusy || selectedFile === null;
+  } else {
+    explainButton.disabled = isBusy || pasteInput.value.trim().length < MIN_PASTE_LENGTH;
+  }
 }
 
 // Check a file before uploading. Returns an error message, or null if fine.
@@ -109,7 +131,7 @@ function selectFile(file) {
   fileSize.textContent = formatSize(file.size);
   dropzone.hidden = true;
   fileCard.hidden = false;
-  explainButton.disabled = false;
+  updateExplainButton();
 }
 
 function removeFile() {
@@ -117,7 +139,7 @@ function removeFile() {
   fileInput.value = ""; // lets the same file be chosen again later
   fileCard.hidden = true;
   dropzone.hidden = false;
-  explainButton.disabled = true;
+  updateExplainButton();
   hideMessage(uploadError);
 }
 
@@ -243,7 +265,7 @@ function uploadAndExplain() {
 function finishUpload() {
   isBusy = false;
   progress.hidden = true;
-  explainButton.disabled = selectedFile === null;
+  updateExplainButton();
   removeButton.disabled = false;
 }
 
@@ -252,9 +274,14 @@ function showResult(text, readText) {
   explanation.textContent = text; // textContent, never innerHTML
   documentText = readText;
   extractedText.textContent = readText;
+  // Pasted text is already visible in the paste box, so only show the
+  // "text read from your document" box for PDFs.
+  extractedBox.hidden = mode === "paste";
   qaHistory = [];
   explainButton.hidden = true;
   removeButton.hidden = true;
+  modeSwitch.hidden = true;
+  pasteInput.readOnly = true; // the pasted text can't change after explaining
   resultPanel.hidden = false;
   updateAskButton();
 
@@ -262,7 +289,90 @@ function showResult(text, readText) {
   explanationTitle.focus();
 }
 
-explainButton.addEventListener("click", uploadAndExplain);
+// Send pasted text to the server. Text is small, so fetch() is enough here;
+// no progress bar is needed, only the "explaining" state.
+async function explainPasted() {
+  const text = pasteInput.value.trim();
+  if (text.length < MIN_PASTE_LENGTH || isBusy) {
+    return;
+  }
+
+  isBusy = true;
+  updateExplainButton();
+  hideMessage(uploadError);
+  progress.hidden = false;
+  progress.classList.add("is-processing");
+  progressText.textContent = "Explaining your text. This can take up to 30 seconds";
+  setProgress(1);
+  progressPercent.textContent = "";
+
+  try {
+    const response = await fetch("/api/documents/explain-text", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text }),
+    });
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (readError) {
+      data = null;
+    }
+
+    if (!response.ok || !data || typeof data.explanation !== "string") {
+      throw new Error(
+        (data && data.error) || "Something went wrong on the server. Wait a moment and try again."
+      );
+    }
+
+    showResult(data.explanation, data.document_text || text);
+  } catch (error) {
+    finishUpload();
+    if (error instanceof TypeError) {
+      showMessage(uploadError, "Couldn't reach the server. Check your internet connection and try again.");
+    } else {
+      showMessage(uploadError, error.message);
+    }
+  }
+}
+
+// One button explains whichever kind of document is selected.
+explainButton.addEventListener("click", function () {
+  if (mode === "pdf") {
+    uploadAndExplain();
+  } else {
+    explainPasted();
+  }
+});
+
+
+/* ---------- Switching between "Upload a PDF" and "Paste text" ---------- */
+
+function setMode(newMode) {
+  if (isBusy) {
+    return;
+  }
+  mode = newMode;
+  modePdfButton.setAttribute("aria-pressed", String(mode === "pdf"));
+  modePasteButton.setAttribute("aria-pressed", String(mode === "paste"));
+  pdfMode.hidden = mode !== "pdf";
+  pasteMode.hidden = mode !== "paste";
+  hideMessage(uploadError);
+  updateExplainButton();
+}
+
+modePdfButton.addEventListener("click", function () { setMode("pdf"); });
+modePasteButton.addEventListener("click", function () {
+  setMode("paste");
+  pasteInput.focus();
+});
+
+// Keep the character count and the Explain button up to date while typing.
+pasteInput.addEventListener("input", function () {
+  pasteCount.textContent = pasteInput.value.length.toLocaleString() + " / 30,000";
+  updateExplainButton();
+});
 
 
 /* ---------- Follow-up questions ---------- */
@@ -368,6 +478,14 @@ clearButton.addEventListener("click", function () {
 
   explainButton.hidden = false;
   removeButton.hidden = false;
+  modeSwitch.hidden = false;
+  pasteInput.readOnly = false;
+  pasteInput.value = "";
+  pasteCount.textContent = "0 / 30,000";
   removeFile();
-  fileInput.focus();
+  if (mode === "pdf") {
+    fileInput.focus();
+  } else {
+    pasteInput.focus();
+  }
 });

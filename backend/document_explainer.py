@@ -5,6 +5,7 @@ How a document is explained (Phase 4):
 1. read_uploaded_pdf() checks the upload (type, size, real PDF).
 2. extract_text() pulls the text out of the PDF with PyMuPDF, keeping
    each line of a table together (see _page_lines below).
+   Or, if the person pasted text instead, clean_pasted_text() checks it.
 3. explain() sends that text to the AI with the document instructions
    from safety.py.
 4. Follow-up questions: the browser sends the extracted text back with
@@ -154,6 +155,27 @@ def extract_text(pdf_bytes):
         raise DocumentError("This document has too much text to explain at once. Try a shorter document.")
 
     return text
+
+
+def clean_pasted_text(text):
+    """
+    Check text that the person pasted instead of uploading a PDF.
+
+    Returns (clean_text, None) when it is usable, or (None, error_message).
+    """
+    if not isinstance(text, str):
+        return None, "Paste the text of your document before pressing Explain document."
+
+    # Windows uses "\r\n" for new lines; turn every kind into a plain "\n".
+    text = text.replace("\r\n", "\n").replace("\r", "\n").strip()
+
+    if len(text) < MIN_TEXT_LENGTH:
+        return None, "Paste a bit more of your document. There isn't enough text to explain."
+
+    if len(text) > MAX_TEXT_LENGTH:
+        return None, f"That's more than {MAX_TEXT_LENGTH:,} characters. Paste a shorter part of the document."
+
+    return text, None
 
 
 # ---------------------------------------------------------------------------

@@ -153,6 +153,28 @@ def documents_explain_api():
     return jsonify(explanation=explanation, document_text=document_text)
 
 
+@app.route("/api/documents/explain-text", methods=["POST"])
+def documents_explain_text_api():
+    """Explain text that was pasted instead of uploaded as a PDF."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="The request could not be read. Reload the page and try again."), 400
+
+    document_text, error = document_explainer.clean_pasted_text(data.get("text"))
+    if error:
+        return jsonify(error=error), 400
+
+    if not rate_limit.allow_request(rate_limit.get_visitor_id(request)):
+        return jsonify(error="You've made a lot of requests in a short time. Wait a few minutes and try again."), 429
+
+    try:
+        explanation = document_explainer.explain(document_text)
+    except ai_service.AIServiceError as problem:
+        return jsonify(error=str(problem)), 503
+
+    return jsonify(explanation=explanation, document_text=document_text)
+
+
 @app.route("/api/documents/ask", methods=["POST"])
 def documents_ask_api():
     """Answer a follow-up question about the uploaded document."""

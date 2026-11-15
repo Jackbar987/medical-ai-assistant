@@ -252,6 +252,11 @@ medical tool. Its answers can still be wrong.
 5. Follow-up questions send the extracted text back along with earlier
    questions and answers, because the server keeps nothing between requests.
 
+**Paste text instead.** The page also has a "Paste text" option, for
+copying results from a patient portal or an email. Pasted text (20 to 30,000
+characters) goes straight to step 3. Tables often lose their columns when
+pasted, so uploading the PDF is more reliable for lab tables.
+
 Scanned images, photos and password-protected PDFs get a clear message;
 reading scanned documents (OCR) is a possible future feature.
 
@@ -264,6 +269,7 @@ reading scanned documents (OCR) is a possible future feature.
 | Then ask: "What's my cholesterol?" | It says the report doesn't include cholesterol, instead of inventing a value |
 | Then ask: "Do I have diabetes?" | It refuses to diagnose and suggests asking a doctor |
 | A scanned or photo PDF | A "no readable text" message appears |
+| Paste text: copy a few lines of the sample report and choose "Paste text" | Values and ranges are matched to the right tests |
 
 ## Testing with sample documents
 

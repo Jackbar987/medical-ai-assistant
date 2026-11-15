@@ -17,20 +17,30 @@
   <div class="narrow-page">
     <h1>Medical Document Explainer</h1>
     <p class="page-lead">
-      Upload a lab report or another medical PDF and get its terms,
-      abbreviations, and measurements explained in everyday words.
+      Upload a lab report or another medical PDF, or paste its text, and get
+      its terms, abbreviations, and measurements explained in everyday words.
     </p>
 
     <p class="info-note">
       <strong>Please use sample documents only.</strong>
-      This is a prototype, so don't upload real medical records. You can try
+      This is a prototype, so don't upload or paste real medical records. You can try
       it with our <a href="{{ url_for('static', filename='samples/sample-blood-test-report.pdf') }}" download>sample blood test report</a>,
       which contains made-up values.
     </p>
 
-    <!-- Step 1: choose and upload a file. -->
+    <!-- Step 1: choose a PDF or paste text. -->
     <div class="panel" id="upload-panel">
       <h2>Your document</h2>
+
+      <!-- Two buttons that switch between uploading and pasting.
+           aria-pressed tells screen readers which one is selected. -->
+      <div class="mode-switch" id="mode-switch" role="group" aria-label="How to add your document">
+        <button class="mode-button" type="button" id="mode-pdf" aria-pressed="true">Upload a PDF</button>
+        <button class="mode-button" type="button" id="mode-paste" aria-pressed="false">Paste text</button>
+      </div>
+
+      <!-- Option 1: upload a PDF. -->
+      <div id="pdf-mode">
 
       <!-- The drop area. The real file picker is the hidden input; the label
            styled as a button opens it, and it also works with the keyboard. -->
@@ -56,6 +66,19 @@
           <p class="file-size" id="file-size"></p>
         </div>
         <button class="button-text" type="button" id="remove-file">Remove</button>
+      </div>
+
+      </div>
+
+      <!-- Option 2: paste the document's text. -->
+      <div id="paste-mode" hidden>
+        <label class="paste-label" for="paste-input">Paste the text of your document</label>
+        <textarea id="paste-input" rows="10" maxlength="30000"
+                  placeholder="For example, copy the results from a patient portal or a lab report and paste them here."></textarea>
+        <div class="paste-footer">
+          <span class="dropzone-hint">Tables may lose their columns when pasted. Uploading the PDF keeps them better.</span>
+          <span class="chat-count" id="paste-count">0 / 30,000</span>
+        </div>
       </div>
 
       <!-- Upload progress. -->
@@ -89,7 +112,7 @@
       <div class="explanation" id="explanation"></div>
 
       <!-- The exact text read from the PDF, so people can check it. -->
-      <details class="extracted">
+      <details class="extracted" id="extracted">
         <summary>Show the text read from your document</summary>
         <pre class="extracted-text" id="extracted-text"></pre>
       </details>

@@ -729,6 +729,79 @@ a {
   outline: none;
 }
 
+/* The "Upload a PDF" / "Paste text" switch: two buttons joined together. */
+.mode-switch {
+  display: inline-flex;
+  margin-top: 1rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-medium);
+  background: var(--page);
+}
+
+.mode-button {
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* The selected option looks raised, like a tab. */
+.mode-button[aria-pressed="true"] {
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(20, 41, 77, 0.15);
+  color: var(--navy);
+}
+
+.paste-label {
+  display: block;
+  margin-top: 1rem;
+  color: var(--navy);
+  font-weight: 700;
+}
+
+#paste-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  background: var(--page);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+#paste-input:focus {
+  background: var(--surface);
+  border-color: var(--teal);
+}
+
+#paste-input[readonly] {
+  color: var(--muted);
+}
+
+.paste-footer {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.paste-footer .dropzone-hint {
+  margin-top: 0.5rem;
+}
+
+.paste-footer .chat-count {
+  margin-top: 0.5rem;
+  white-space: nowrap;
+}
+
 /* The dashed area files can be dropped onto. */
 .dropzone {
   display: flex;
