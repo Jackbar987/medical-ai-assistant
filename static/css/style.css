@@ -570,6 +570,15 @@ a {
   color: var(--text);
 }
 
+/* Fixed emergency guidance: amber with a strong left edge so it stands out. */
+.message-urgent {
+  max-width: 100%;
+  background: var(--alert-bg);
+  border-left: 5px solid #b25e00;
+  color: var(--alert-text);
+  font-weight: 700;
+}
+
 /* The three dots shown while waiting. */
 .message-loading {
   display: flex;

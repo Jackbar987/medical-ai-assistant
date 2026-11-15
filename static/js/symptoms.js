@@ -37,11 +37,15 @@ const counter = document.getElementById("chat-count");
 /* ---------- Showing things on the page ---------- */
 
 // Add one message bubble to the chat and return it.
-function addMessage(role, text) {
+// isUrgent is true for emergency guidance, which gets a stronger style.
+function addMessage(role, text, isUrgent) {
   emptyState.hidden = true;
 
   const bubble = document.createElement("div");
   bubble.className = "message message-" + role;
+  if (isUrgent) {
+    bubble.classList.add("message-urgent");
+  }
 
   // Hidden label so screen reader users know who said what.
   const label = document.createElement("span");
@@ -147,7 +151,9 @@ async function sendMessage(text) {
 
     conversation.push({ role: "assistant", content: data.reply });
     hideLoading();
-    addMessage("assistant", data.reply);
+    // data.urgent is true when the server spotted possible emergency signs
+    // and answered with fixed emergency guidance instead of an AI reply.
+    addMessage("assistant", data.reply, data.urgent === true);
   } catch (error) {
     hideLoading();
 
