@@ -21,6 +21,13 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB in bytes
 let selectedFile = null; // the File object the user chose
 let isBusy = false;      // true while uploading or waiting for an answer
 
+// The text the server read from the PDF. The server remembers nothing
+// between requests, so we send this back with every follow-up question.
+let documentText = "";
+
+// Earlier questions and answers, sent along so the AI knows the context.
+let qaHistory = [];
+
 // Parts of the page.
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("file-input");
@@ -39,6 +46,7 @@ const uploadError = document.getElementById("upload-error");
 const resultPanel = document.getElementById("result-panel");
 const explanationTitle = document.getElementById("explanation-title");
 const explanation = document.getElementById("explanation");
+const extractedText = document.getElementById("extracted-text");
 const clearButton = document.getElementById("clear-document");
 const qaList = document.getElementById("qa-list");
 const questionForm = document.getElementById("question-form");
@@ -196,7 +204,7 @@ function uploadAndExplain() {
   // Runs once the whole file has reached the server.
   request.upload.addEventListener("load", function () {
     setProgress(1);
-    progressText.textContent = "Reading your document";
+    progressText.textContent = "Reading and explaining your document. This can take up to 30 seconds";
     progressPercent.textContent = "";
     progress.classList.add("is-processing");
   });
@@ -207,7 +215,7 @@ function uploadAndExplain() {
     const data = request.response;
 
     if (request.status === 200 && data && typeof data.explanation === "string") {
-      showResult(data.explanation);
+      showResult(data.explanation, data.document_text || "");
     } else if (data && data.error) {
       finishUpload();
       showMessage(uploadError, data.error);
@@ -239,9 +247,12 @@ function finishUpload() {
   removeButton.disabled = false;
 }
 
-function showResult(text) {
+function showResult(text, readText) {
   finishUpload();
   explanation.textContent = text; // textContent, never innerHTML
+  documentText = readText;
+  extractedText.textContent = readText;
+  qaHistory = [];
   explainButton.hidden = true;
   removeButton.hidden = true;
   resultPanel.hidden = false;
@@ -289,7 +300,11 @@ async function askQuestion(question) {
     const response = await fetch("/api/documents/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: question }),
+      body: JSON.stringify({
+        question: question,
+        document_text: documentText,
+        history: qaHistory,
+      }),
     });
 
     let data = null;
@@ -307,6 +322,11 @@ async function askQuestion(question) {
 
     entry.answer.textContent = data.answer;
     entry.answer.classList.remove("is-loading");
+    // urgent is true when the question mentioned possible emergency signs.
+    if (data.urgent === true) {
+      entry.answer.classList.add("is-urgent");
+    }
+    qaHistory.push({ question: question, answer: data.answer });
   } catch (error) {
     // Remove the unanswered question and put it back in the box.
     entry.item.remove();
@@ -338,6 +358,9 @@ questionInput.addEventListener("input", updateAskButton);
 
 clearButton.addEventListener("click", function () {
   explanation.textContent = "";
+  extractedText.textContent = "";
+  documentText = "";
+  qaHistory = [];
   qaList.textContent = "";
   questionInput.value = "";
   hideMessage(questionError);

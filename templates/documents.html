@@ -81,7 +81,18 @@
         <button class="button-text" type="button" id="clear-document">Clear document</button>
       </div>
 
+      <p class="result-note">
+        Written by AI from the text in your document. Check any value against
+        your original report, and discuss your results with a healthcare professional.
+      </p>
+
       <div class="explanation" id="explanation"></div>
+
+      <!-- The exact text read from the PDF, so people can check it. -->
+      <details class="extracted">
+        <summary>Show the text read from your document</summary>
+        <pre class="extracted-text" id="extracted-text"></pre>
+      </details>
 
       <h3 class="questions-title">Ask about this document</h3>
       <div class="qa-list" id="qa-list" aria-live="polite"></div>

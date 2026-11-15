@@ -879,6 +879,50 @@ a {
   white-space: pre-wrap;
 }
 
+.result-note {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid var(--teal);
+  background: var(--page);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* The collapsible "text read from your document" box. */
+.extracted {
+  margin-top: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+}
+
+.extracted summary {
+  padding: 0.7rem 1rem;
+  color: var(--navy);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* pre keeps the line breaks and spacing exactly as read. */
+.extracted-text {
+  max-height: 18rem;
+  margin: 0;
+  padding: 0 1rem 1rem;
+  overflow: auto;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* An answer that is emergency guidance. */
+.qa-answer.is-urgent {
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-small);
+  background: var(--alert-bg);
+  color: var(--alert-text);
+  font-weight: 700;
+}
+
 .questions-title {
   margin-top: 2rem;
   padding-top: 1.5rem;
