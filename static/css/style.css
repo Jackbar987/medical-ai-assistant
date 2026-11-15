@@ -1126,9 +1126,23 @@ a {
   outline: none;
 }
 
-.result-summary {
-  margin-top: 0.5rem;
+/* "Based on: ..." line under the medication's name. */
+.label-info {
+  margin-top: 0.35rem;
   color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* "Not covered by this label." */
+.med-section li.not-listed {
+  color: var(--muted);
+  font-style: italic;
+  list-style: none;
+  margin-left: -1.25rem;
+}
+
+.result-summary {
+  margin-top: 1rem;
 }
 
 /* Each section: uses, side effects, precautions, sources. */

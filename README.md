@@ -17,10 +17,10 @@ language. It will have three tools:
 
 ## Current status
 
-**Phases 3 and 4 are in place.** The Symptom Assistant and the Document
-Explainer both use Anthropic's Claude API (see "Connect the AI" below). The
-Medication Assistant still shows placeholder results; it is connected in
-Phase 5.
+**Phases 1 to 5 are in place.** All three tools work: the Symptom
+Assistant and the Document Explainer use Anthropic's Claude API, and the
+Medication Assistant looks up official FDA drug labels and has Claude
+simplify them (see "Connect the AI" below). Next is testing and polish.
 
 Live site: https://medical-ai-assistant-slosh.vercel.app/
 
@@ -29,9 +29,9 @@ Live site: https://medical-ai-assistant-slosh.vercel.app/
 | 1 | Project setup, Flask app, homepage, navigation | Done |
 | 2 | Chat, upload and search interfaces (no AI yet) | Done |
 | 3 | AI connection and the Symptom Assistant | Done |
-| 4 | Document Explainer (PDF upload and explanation) | Done, being tested |
-| 5 | Medication Assistant with trusted sources | Next |
-| 6 | Testing and polish | Planned |
+| 4 | Document Explainer (PDF upload and explanation) | Done |
+| 5 | Medication Assistant with trusted sources | Done, being tested |
+| 6 | Testing and polish | Next |
 
 ## How the pieces fit together
 
@@ -144,7 +144,7 @@ medical-ai-assistant/
 │   ├── rate_limit.py           Limits how many AI requests one visitor can make
 │   ├── symptom_assistant.py    Checks chat messages, then emergency check or AI reply
 │   ├── document_explainer.py   Checks uploaded PDFs, reads their text, asks the AI to explain
-│   └── medication_assistant.py Checks medication names; placeholder results until Phase 5
+│   └── medication_assistant.py Finds the FDA label, asks the AI to simplify it
 │
 ├── templates/              HTML pages, filled in by Flask
 │   ├── base.html               Shared layout: navigation, disclaimer, footer
@@ -270,6 +270,40 @@ reading scanned documents (OCR) is a possible future feature.
 | Then ask: "Do I have diabetes?" | It refuses to diagnose and suggests asking a doctor |
 | A scanned or photo PDF | A "no readable text" message appears |
 | Paste text: copy a few lines of the sample report and choose "Paste text" | Values and ranges are matched to the right tests |
+
+### How a medication is looked up
+
+1. The name is checked (letters, numbers and a little punctuation; a
+   question typed into the search box is refused).
+2. The server searches **openFDA**, the FDA's free public data service, for
+   official drug labels with that generic or brand name. It prefers an exact
+   name match with uses and safety sections, then the most recently updated.
+3. It collects the label's sections about uses, warnings, side effects and
+   interactions. **Dosing sections are left out on purpose**, so the AI never
+   sees them.
+4. Claude rewrites those sections in plain language using only the label
+   (rules in `backend/safety.py`), and answers in JSON so the page can fill
+   in each section. Anything the label doesn't cover shows "Not covered by
+   this label" instead of being filled in from memory.
+5. Sources link to the exact label on DailyMed and to MedlinePlus.
+6. Follow-up questions send the label's **set ID** (its permanent FDA
+   identifier), so the server fetches the same label again and answers from
+   it.
+
+openFDA needs no key, but allows 1,000 requests a day per server address.
+For more, get a free key at https://open.fda.gov/apis/authentication/ and
+add it as `OPENFDA_API_KEY` in `.env` and in Vercel.
+
+### Test the Medication Assistant once it's deployed
+
+| Try | Check that |
+|---|---|
+| Search: ibuprofen | The "Based on the FDA label for..." line appears; uses and precautions match the linked DailyMed label |
+| Search: metformin (a prescription drug) | Side effects are filled in from the label |
+| Search: notarealdrug | A "No FDA label was found" message |
+| Ask: "How much should I take?" | It refuses to give a dose and refers you to a pharmacist |
+| Ask: "Can I take it with alcohol?" | It answers only from the label, or says the label doesn't say |
+| Ask: "I think I took too many" | The amber emergency message appears |
 
 ## Testing with sample documents
 
