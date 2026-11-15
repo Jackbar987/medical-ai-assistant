@@ -11,3 +11,6 @@ python-dotenv==1.2.4
 
 # anthropic: the official library for talking to Anthropic's Claude API.
 anthropic==2.8.0
+
+# pymupdf: reads the text out of uploaded PDF files.
+pymupdf==2.1

@@ -17,7 +17,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 
-from backend import ai_service, document_explainer, medication_assistant, rate_limit, symptom_assistant
+from backend import ai_service, document_explainer, medication_assistant, rate_limit, safety, symptom_assistant
 
 # Read settings from a file named .env (if it exists) and make them available
 # through os.getenv(). The .env file holds private values such as API keys,
@@ -126,7 +126,7 @@ def symptoms_api():
 
 @app.route("/api/documents/explain", methods=["POST"])
 def documents_explain_api():
-    """Receive an uploaded PDF and return an explanation of it."""
+    """Receive an uploaded PDF, read its text, and return an explanation."""
     # Uploaded files arrive in request.files, under the name the browser
     # gave them. documents.js sends the PDF with the name "document".
     uploaded_file = request.files.get("document")
@@ -135,8 +135,44 @@ def documents_explain_api():
     if error:
         return jsonify(error=error), 400
 
-    explanation = document_explainer.get_explanation(pdf_bytes)
-    return jsonify(explanation=explanation)
+    try:
+        document_text = document_explainer.extract_text(pdf_bytes)
+    except document_explainer.DocumentError as problem:
+        return jsonify(error=str(problem)), 400
+
+    if not rate_limit.allow_request(rate_limit.get_visitor_id(request)):
+        return jsonify(error="You've made a lot of requests in a short time. Wait a few minutes and try again."), 429
+
+    try:
+        explanation = document_explainer.explain(document_text)
+    except ai_service.AIServiceError as problem:
+        return jsonify(error=str(problem)), 503
+
+    # The extracted text goes back to the browser too, so the person can
+    # check what was read, and so follow-up questions can include it.
+    return jsonify(explanation=explanation, document_text=document_text)
+
+
+@app.route("/api/documents/explain-text", methods=["POST"])
+def documents_explain_text_api():
+    """Explain text that was pasted instead of uploaded as a PDF."""
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error="The request could not be read. Reload the page and try again."), 400
+
+    document_text, error = document_explainer.clean_pasted_text(data.get("text"))
+    if error:
+        return jsonify(error=error), 400
+
+    if not rate_limit.allow_request(rate_limit.get_visitor_id(request)):
+        return jsonify(error="You've made a lot of requests in a short time. Wait a few minutes and try again."), 429
+
+    try:
+        explanation = document_explainer.explain(document_text)
+    except ai_service.AIServiceError as problem:
+        return jsonify(error=str(problem)), 503
+
+    return jsonify(explanation=explanation, document_text=document_text)
 
 
 @app.route("/api/documents/ask", methods=["POST"])
@@ -146,13 +182,24 @@ def documents_ask_api():
     if not isinstance(data, dict):
         return jsonify(error="The request could not be read. Reload the page and try again."), 400
 
-    question = data.get("question")
-    error = document_explainer.validate_question(question)
+    question, document_text, history, error = document_explainer.validate_question(data)
     if error:
         return jsonify(error=error), 400
 
-    answer = document_explainer.answer_question(question)
-    return jsonify(answer=answer)
+    # Questions can mention symptoms too, so the emergency check runs here.
+    kind = safety.check_message(question)
+    if kind:
+        return jsonify(answer=safety.urgent_reply(kind), urgent=True)
+
+    if not rate_limit.allow_request(rate_limit.get_visitor_id(request)):
+        return jsonify(error="You've made a lot of requests in a short time. Wait a few minutes and try again."), 429
+
+    try:
+        answer = document_explainer.answer_question(question, document_text, history)
+    except ai_service.AIServiceError as problem:
+        return jsonify(error=str(problem)), 503
+
+    return jsonify(answer=answer, urgent=False)
 
 
 @app.route("/api/medications/search", methods=["POST"])

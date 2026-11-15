@@ -729,6 +729,79 @@ a {
   outline: none;
 }
 
+/* The "Upload a PDF" / "Paste text" switch: two buttons joined together. */
+.mode-switch {
+  display: inline-flex;
+  margin-top: 1rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-medium);
+  background: var(--page);
+}
+
+.mode-button {
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* The selected option looks raised, like a tab. */
+.mode-button[aria-pressed="true"] {
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(20, 41, 77, 0.15);
+  color: var(--navy);
+}
+
+.paste-label {
+  display: block;
+  margin-top: 1rem;
+  color: var(--navy);
+  font-weight: 700;
+}
+
+#paste-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  background: var(--page);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+#paste-input:focus {
+  background: var(--surface);
+  border-color: var(--teal);
+}
+
+#paste-input[readonly] {
+  color: var(--muted);
+}
+
+.paste-footer {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.paste-footer .dropzone-hint {
+  margin-top: 0.5rem;
+}
+
+.paste-footer .chat-count {
+  margin-top: 0.5rem;
+  white-space: nowrap;
+}
+
 /* The dashed area files can be dropped onto. */
 .dropzone {
   display: flex;
@@ -877,6 +950,50 @@ a {
 .explanation {
   margin-top: 1rem;
   white-space: pre-wrap;
+}
+
+.result-note {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid var(--teal);
+  background: var(--page);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* The collapsible "text read from your document" box. */
+.extracted {
+  margin-top: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+}
+
+.extracted summary {
+  padding: 0.7rem 1rem;
+  color: var(--navy);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* pre keeps the line breaks and spacing exactly as read. */
+.extracted-text {
+  max-height: 18rem;
+  margin: 0;
+  padding: 0 1rem 1rem;
+  overflow: auto;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* An answer that is emergency guidance. */
+.qa-answer.is-urgent {
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-small);
+  background: var(--alert-bg);
+  color: var(--alert-text);
+  font-weight: 700;
 }
 
 .questions-title {
