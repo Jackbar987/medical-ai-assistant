@@ -1,22 +1,93 @@
 {% extends "base.html" %}
-<!-- medications.html - the Medication Assistant page. The search is added in Phase 2. -->
+<!--
+  medications.html - the Medication Assistant page.
+  The behaviour (searching, showing results, questions) lives in
+  static/js/medications.js. This file only defines the parts.
+-->
 
 {% block title %}Medication Assistant | {{ app_name }}{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/medications.js') }}" defer></script>
+{% endblock %}
+
 {% block content %}
 <section class="page">
-  <div class="container page-inner">
+  <div class="container">
+  <div class="narrow-page">
     <h1>Medication Assistant</h1>
     <p class="page-lead">
       Look up a medication to learn what it is generally used for, its
       common side effects, and the precautions to know about.
     </p>
 
-    <div class="notice">
-      <h2>This tool is not ready yet</h2>
-      <p>The medication search will appear on this page once we build it.</p>
-      <a class="button button-secondary" href="{{ url_for('home') }}">Back to home</a>
+    <p class="info-note">
+      <strong>This tool explains medications in general.</strong>
+      It can't tell you how much to take, or whether to start, stop, or
+      combine medications. Ask a pharmacist or doctor about your own medications.
+    </p>
+
+    <!-- The search box. -->
+    <div class="panel">
+      <form class="inline-form" id="search-form" role="search">
+        <label class="visually-hidden" for="search-input">Medication name</label>
+        <input type="search" id="search-input" maxlength="100" autocomplete="off"
+               placeholder="Medication name, such as ibuprofen">
+        <button class="button button-primary" type="submit" id="search-button" disabled>Search</button>
+      </form>
+
+      <!-- Clicking an example searches for it. -->
+      <div class="examples">
+        <span class="examples-label" id="examples-label">Examples:</span>
+        <div class="examples-list" role="group" aria-labelledby="examples-label">
+          <button class="example" type="button" data-name="ibuprofen">ibuprofen</button>
+          <button class="example" type="button" data-name="amoxicillin">amoxicillin</button>
+          <button class="example" type="button" data-name="metformin">metformin</button>
+        </div>
+      </div>
+
+      <p class="search-status" id="search-status" aria-live="polite" hidden></p>
+      <p class="form-error" id="search-error" role="alert" hidden></p>
     </div>
+
+    <!-- The results. Hidden until a search succeeds. -->
+    <div class="panel" id="result-panel" hidden>
+      <h2 class="result-title" id="result-title" tabindex="-1"></h2>
+      <p class="result-summary" id="result-summary"></p>
+
+      <div class="med-section">
+        <h3>What it's used for</h3>
+        <ul id="uses-list"></ul>
+      </div>
+
+      <div class="med-section">
+        <h3>Common side effects</h3>
+        <ul id="side-effects-list"></ul>
+      </div>
+
+      <div class="med-section">
+        <h3>Precautions</h3>
+        <ul id="precautions-list"></ul>
+      </div>
+
+      <div class="med-section">
+        <h3>Sources</h3>
+        <ul class="source-list" id="sources-list"></ul>
+      </div>
+
+      <h3 class="questions-title">Ask about this medication</h3>
+      <div class="qa-list" id="qa-list" aria-live="polite"></div>
+
+      <form class="inline-form" id="question-form">
+        <label class="visually-hidden" for="question-input">Your question about this medication</label>
+        <input type="text" id="question-input" maxlength="1000" autocomplete="off"
+               placeholder="Example: Take it with food?">
+        <button class="button button-primary" type="submit" id="ask-button" disabled>Ask</button>
+      </form>
+
+      <p class="form-error" id="question-error" role="alert" hidden></p>
+    </div>
+  </div>
   </div>
 </section>
 {% endblock %}

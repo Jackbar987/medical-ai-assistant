@@ -908,13 +908,14 @@ a {
   color: var(--muted);
 }
 
-.question-form {
+/* A text box with a button beside it (searches and questions). */
+.inline-form {
   display: flex;
   gap: 0.75rem;
   margin-top: 1rem;
 }
 
-.question-form input {
+.inline-form input {
   flex: 1;
   min-width: 0;
   padding: 0.75rem 0.9rem;
@@ -925,9 +926,106 @@ a {
   font: inherit;
 }
 
-.question-form input:focus {
+.inline-form input:focus {
   background: var(--surface);
   border-color: var(--teal);
+}
+
+/* ---------- 8d. Medication Assistant ---------- */
+
+/* The search form has no gap above it, unlike the question form. */
+.panel > .inline-form:first-child {
+  margin-top: 0;
+}
+
+/* Remove the browser's own "x" and search styling so it matches our inputs. */
+.inline-form input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 1rem;
+}
+
+.examples-label {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.examples-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Small rounded buttons for the example names. */
+.example {
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--page);
+  color: var(--navy);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.example:hover {
+  border-color: var(--teal);
+  background: var(--teal-tint);
+}
+
+.example:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-status {
+  margin-top: 1rem;
+  color: var(--muted);
+}
+
+/* The medication's name. */
+.result-title {
+  font-size: 1.6rem;
+  text-transform: capitalize;
+}
+
+.result-title:focus {
+  outline: none;
+}
+
+.result-summary {
+  margin-top: 0.5rem;
+  color: var(--muted);
+}
+
+/* Each section: uses, side effects, precautions, sources. */
+.med-section {
+  margin-top: 1.5rem;
+}
+
+.med-section h3 {
+  font-size: 1.05rem;
+}
+
+.med-section ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.med-section li + li {
+  margin-top: 0.35rem;
+}
+
+.source-list a {
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- 9. Disclaimer and footer ---------- */
