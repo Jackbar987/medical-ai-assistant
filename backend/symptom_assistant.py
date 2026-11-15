@@ -13,11 +13,15 @@ The server keeps no memory between requests. This is deliberate: nothing
 about the user's health is stored, and it works on serverless hosting like
 Vercel, where each request may be handled by a fresh copy of the app.
 
-Phase 2 (now): check the conversation and send back a placeholder reply.
-Phase 3: replace get_reply() so it asks the AI through ai_service.py.
+How a reply is made (Phase 3):
+1. safety.check_message() looks at the newest message for signs of an
+   emergency or crisis. If it finds one, we answer with fixed emergency
+   guidance and don't ask the AI at all.
+2. Otherwise the conversation goes to the AI through ai_service.ask(),
+   together with the symptom instructions from safety.py.
 """
 
-import time
+from backend import ai_service, safety
 
 # Limits that protect the server (and, later, our AI bill) from huge requests.
 MAX_USER_MESSAGE_LENGTH = 2000       # characters in one message from the user
@@ -65,24 +69,27 @@ def validate_conversation(messages):
     return None
 
 
+def check_for_urgent(messages):
+    """
+    Check the newest message for an emergency or crisis.
+
+    Returns a reply dictionary with fixed guidance, or None if nothing was
+    found. This runs before the AI and before the rate limit, so this
+    guidance is always shown immediately, for free.
+    """
+    kind = safety.check_message(messages[-1]["content"])
+    if kind is None:
+        return None
+    return {"reply": safety.urgent_reply(kind), "urgent": True}
+
+
 def get_reply(messages):
     """
-    Return the assistant's reply to the latest message.
+    Ask the AI for a reply to the conversation.
 
-    PLACEHOLDER: the AI is connected in Phase 3. For now this confirms that
-    the message travelled from the browser to the server and back.
+    Returns {"reply": "...", "urgent": False}. If the AI can't answer,
+    ai_service.ask() raises ai_service.AIServiceError, which app.py turns into
+    an error message for the user.
     """
-    # TEMPORARY: pause briefly so we can see the loading indicator while
-    # testing. Delete this line in Phase 3, when the AI adds a real wait.
-    time.sleep(0.8)
-
-    latest = messages[-1]["content"].strip()
-    if len(latest) > 120:
-        latest = latest[:120] + "..."
-
-    return (
-        "The AI isn't connected yet, so this is a placeholder reply. "
-        f'The server received your message: "{latest}" '
-        "Once the AI is connected, general information about your symptoms "
-        "will appear here."
-    )
+    text = ai_service.ask(safety.SYMPTOM_INSTRUCTIONS, messages)
+    return {"reply": text, "urgent": False}

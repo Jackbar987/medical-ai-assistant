@@ -17,7 +17,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 
-from backend import document_explainer, medication_assistant, symptom_assistant
+from backend import ai_service, document_explainer, medication_assistant, rate_limit, symptom_assistant
 
 # Read settings from a file named .env (if it exists) and make them available
 # through os.getenv(). The .env file holds private values such as API keys,
@@ -105,8 +105,23 @@ def symptoms_api():
         # 400 means "Bad Request": the problem is with what was sent.
         return jsonify(error=error), 400
 
-    reply = symptom_assistant.get_reply(messages)
-    return jsonify(reply=reply)
+    # 1. Emergency or crisis? Answer immediately with fixed guidance.
+    urgent = symptom_assistant.check_for_urgent(messages)
+    if urgent:
+        return jsonify(urgent)
+
+    # 2. Too many requests from this visitor? 429 means "Too Many Requests".
+    visitor = rate_limit.get_visitor_id(request)
+    if not rate_limit.allow_request(visitor):
+        return jsonify(error="You've sent a lot of messages in a short time. Wait a few minutes and try again."), 429
+
+    # 3. Ask the AI. 503 means "Service Unavailable": the problem is on our side.
+    try:
+        result = symptom_assistant.get_reply(messages)
+    except ai_service.AIServiceError as error:
+        return jsonify(error=str(error)), 503
+
+    return jsonify(result)
 
 
 @app.route("/api/documents/explain", methods=["POST"])
