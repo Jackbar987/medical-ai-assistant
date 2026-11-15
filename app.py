@@ -204,7 +204,7 @@ def documents_ask_api():
 
 @app.route("/api/medications/search", methods=["POST"])
 def medications_search_api():
-    """Look up a medication by name."""
+    """Look up a medication's FDA label and return it in plain language."""
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify(error="The request could not be read. Reload the page and try again."), 400
@@ -213,28 +213,47 @@ def medications_search_api():
     if error:
         return jsonify(error=error), 400
 
-    result = medication_assistant.look_up(name)
+    if not rate_limit.allow_request(rate_limit.get_visitor_id(request)):
+        return jsonify(error="You've made a lot of requests in a short time. Wait a few minutes and try again."), 429
+
+    try:
+        result = medication_assistant.look_up(name)
+    except medication_assistant.MedicationError as problem:
+        # 404 when no label was found, 503 when the FDA service had a problem.
+        return jsonify(error=str(problem)), problem.status
+    except ai_service.AIServiceError as problem:
+        return jsonify(error=str(problem)), 503
+
     return jsonify(result)
 
 
 @app.route("/api/medications/ask", methods=["POST"])
 def medications_ask_api():
-    """Answer a follow-up question about a medication."""
+    """Answer a follow-up question about a medication, from its FDA label."""
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify(error="The request could not be read. Reload the page and try again."), 400
 
-    name, error = medication_assistant.clean_medication_name(data.get("medication"))
-    if error:
-        return jsonify(error="Search for a medication before asking a question."), 400
-
-    question = data.get("question")
-    error = medication_assistant.validate_question(question)
+    set_id, name, question, history, error = medication_assistant.validate_question(data)
     if error:
         return jsonify(error=error), 400
 
-    answer = medication_assistant.answer_question(name, question)
-    return jsonify(answer=answer)
+    # Questions can describe an emergency, such as a possible overdose.
+    kind = safety.check_message(question)
+    if kind:
+        return jsonify(answer=safety.urgent_reply(kind), urgent=True)
+
+    if not rate_limit.allow_request(rate_limit.get_visitor_id(request)):
+        return jsonify(error="You've made a lot of requests in a short time. Wait a few minutes and try again."), 429
+
+    try:
+        answer = medication_assistant.answer_question(set_id, name, question, history)
+    except medication_assistant.MedicationError as problem:
+        return jsonify(error=str(problem)), problem.status
+    except ai_service.AIServiceError as problem:
+        return jsonify(error=str(problem)), 503
+
+    return jsonify(answer=answer, urgent=False)
 
 
 @app.errorhandler(413)

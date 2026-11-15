@@ -3,13 +3,17 @@
 
     1. The user types a medication name (or clicks an example) and searches.
     2. We send the name to /api/medications/search.
-    3. The server answers with JSON in a fixed shape: a summary, lists of
-       uses, side effects and precautions, and a list of sources.
+    3. The server finds the medication's official FDA label, has the AI
+       simplify it, and answers with JSON in a fixed shape: a summary, lists
+       of uses, side effects and precautions, the label's details, and sources.
     4. We fill in each section of the page from that JSON.
-    5. Follow-up questions go to /api/medications/ask with the medication's name.
+    5. Follow-up questions go to /api/medications/ask with the label's set ID
+       (its permanent FDA identifier), so the same label answers them.
 */
 
 let currentMedication = null; // the name shown in the results
+let currentSetId = "";        // the FDA label's set ID, for follow-up questions
+let qaHistory = [];           // earlier questions and answers about this label
 let isBusy = false;           // true while waiting for the server
 
 // Parts of the page.
@@ -23,6 +27,7 @@ const exampleButtons = document.querySelectorAll(".example");
 const resultPanel = document.getElementById("result-panel");
 const resultTitle = document.getElementById("result-title");
 const resultSummary = document.getElementById("result-summary");
+const labelInfo = document.getElementById("label-info");
 const usesList = document.getElementById("uses-list");
 const sideEffectsList = document.getElementById("side-effects-list");
 const precautionsList = document.getElementById("precautions-list");
@@ -87,7 +92,17 @@ async function postJson(url, body) {
 // Replace a list's contents with one <li> per item.
 function fillList(listElement, items) {
   listElement.textContent = ""; // remove old items
-  (items || []).forEach(function (item) {
+
+  // If the label doesn't cover this section, say so instead of leaving a gap.
+  if (!items || items.length === 0) {
+    const li = document.createElement("li");
+    li.className = "not-listed";
+    li.textContent = "Not covered by this label.";
+    listElement.appendChild(li);
+    return;
+  }
+
+  items.forEach(function (item) {
     const li = document.createElement("li");
     li.textContent = item; // textContent, never innerHTML
     listElement.appendChild(li);
@@ -128,13 +143,25 @@ async function search(name) {
   isBusy = true;
   updateButtons();
   hideMessage(searchError);
-  showMessage(searchStatus, "Looking up " + name + "...");
+  showMessage(searchStatus, "Finding the FDA label for " + name + " and simplifying it. This can take up to 30 seconds...");
 
   try {
     const data = await postJson("/api/medications/search", { name: name });
 
     currentMedication = data.name;
+    currentSetId = data.set_id || "";
+    qaHistory = [];
     resultTitle.textContent = data.name;
+    if (data.label) {
+      // For example: "Based on the FDA label for Advil (ibuprofen), made by
+      // Example Pharma Inc. (over-the-counter label, updated March 4, 2025)"
+      const kind = data.label.type ? data.label.type + " label, " : "";
+      labelInfo.textContent =
+        "Based on the FDA label for " + data.label.title + ", made by " +
+        data.label.manufacturer + " (" + kind + "updated " + data.label.updated + ")";
+    } else {
+      labelInfo.textContent = "";
+    }
     resultSummary.textContent = data.summary || "";
     fillList(usesList, data.uses);
     fillList(sideEffectsList, data.side_effects);
@@ -200,11 +227,18 @@ async function askQuestion(question) {
 
   try {
     const data = await postJson("/api/medications/ask", {
+      set_id: currentSetId,
       medication: currentMedication,
       question: question,
+      history: qaHistory,
     });
     answerText.textContent = data.answer;
     answerText.classList.remove("is-loading");
+    // urgent is true when the question mentioned possible emergency signs.
+    if (data.urgent === true) {
+      answerText.classList.add("is-urgent");
+    }
+    qaHistory.push({ question: question, answer: data.answer });
   } catch (error) {
     item.remove();
     questionInput.value = question; // put it back so it can be sent again
