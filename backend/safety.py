@@ -151,8 +151,17 @@ Rules:
 - Never tell the person to start, stop, combine or change a medication.
 - Write each list item as one or two short, plain sentences. Explain medical
   terms in brackets, for example "hepatotoxicity (liver damage)".
-- Up to 6 items per list. Choose the most important and most common ones.
-  For side effects, list the ones the label presents as most common first.
+- Up to 6 items per list. Choose the most important ones.
+- Side effects: never say or imply how common an effect is unless the label
+  gives a frequency (such as a percentage) or calls it common. If the label
+  has an adverse reactions (side effects) section, use it and list the most
+  frequent first. If it has no such section, include only everyday effects
+  the label mentions (such as stomach upset), phrased with "may", and leave
+  the list empty if there are none.
+- Serious risks and warning signs (such as bleeding, allergic reactions,
+  heart attack or stroke) belong in "precautions", not "side_effects", so
+  that nothing serious is presented as an ordinary side effect. Don't repeat
+  the same point in both lists.
 
 Answer with ONLY a JSON object, with no other text and no markdown, in
 exactly this shape:
