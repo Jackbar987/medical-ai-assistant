@@ -8,7 +8,7 @@ refuses new ones once they pass a limit.
 LIMITATION: the memory lives inside one running copy of the app. On Vercel,
 several copies can run at once and each copy starts with an empty memory,
 so a determined visitor could get past this. That's acceptable for a
-hackathon prototype because the spending limit on the OpenAI account is the
+hackathon prototype because the spend limit on the Claude Console account is the
 real safety net. A production app would keep these counts in a shared
 database (Redis is a common choice).
 """

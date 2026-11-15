@@ -18,7 +18,7 @@ language. It will have three tools:
 ## Current status
 
 **Phase 3 is under way.** All three tools have working screens. The
-Symptom Assistant is connected to OpenAI's API (once a key is added, see
+Symptom Assistant is connected to Anthropic's Claude API (once a key is added, see
 "Connect the AI" below). The Document Explainer and Medication Assistant
 still show placeholder replies; they are connected in Phases 4 and 5.
 
@@ -139,7 +139,7 @@ medical-ai-assistant/
 │
 ├── backend/                Python code behind each feature (placeholders for now)
 │   ├── __init__.py             Marks the folder as a Python package
-│   ├── ai_service.py           The one place that talks to OpenAI
+│   ├── ai_service.py           The one place that talks to the AI (Claude)
 │   ├── safety.py               AI safety instructions and the emergency/crisis phrase check
 │   ├── rate_limit.py           Limits how many AI requests one visitor can make
 │   ├── symptom_assistant.py    Checks chat messages, then emergency check or AI reply
@@ -178,29 +178,31 @@ Two things differ from the first sketch of the structure:
 
 ## Connect the AI
 
-The Symptom Assistant uses OpenAI's API. The API is separate from a ChatGPT
-subscription: it has its own account and is billed per use.
+The Symptom Assistant uses Anthropic's Claude API. The API is separate from
+the Claude chat app: it has its own sign-up in the Claude Console and is
+billed per use. Anthropic's terms require API account holders to be 18 or
+older.
 
-1. **Create an API account** at https://platform.openai.com. Under-18s need a
-   parent or guardian's permission under OpenAI's terms.
-2. **Set a spending limit first.** In Settings, go to **Limits**, set a
-   monthly limit of about $10-20, and turn on **Enforce a hard limit**. A
-   chat message costs roughly 1 cent, so this covers about 1,000-2,000
-   messages, and nobody can run up a big bill through the public site.
-3. **Add credit** (prepaid billing) and **create an API key** under
-   **API keys**. Copy it once; OpenAI won't show it again.
-4. **Locally:** open your `.env` file and set `OPENAI_API_KEY=` to your key.
-   Restart `python app.py`.
+1. **Sign up** in the Claude Console at https://platform.claude.com. New
+   accounts get some free credits for testing.
+2. **Set a spend limit first.** In the Console, open **Settings → Billing**,
+   find **Spend limits**, and set a monthly limit of about $10-20. A chat
+   message costs roughly 1 cent, so this covers about 1,000-2,000 messages,
+   and nobody can run up a big bill through the public site.
+3. **Create an API key** under **API keys**. Copy it once; the Console
+   won't show it again.
+4. **Locally:** open your `.env` file and set `ANTHROPIC_API_KEY=` to your
+   key. Restart `python app.py`.
 5. **On Vercel:** open the project, go to **Settings → Environment
-   Variables**, add `OPENAI_API_KEY` with your key, then **redeploy** (new
+   Variables**, add `ANTHROPIC_API_KEY` with your key, then **redeploy** (new
    settings only apply to new deployments).
 
 **Never** put the key in a code file, in `.env.example`, in a GitHub issue,
 or in a chat message. If it leaks, delete it on the API keys page and make a
 new one.
 
-Optional settings in `.env` / Vercel: `OPENAI_MODEL` (default
-`gpt-6.1-sol`) and `OPENAI_REASONING_EFFORT` (default `low`).
+Optional setting in `.env` / Vercel: `ANTHROPIC_MODEL` (default
+`claude-sonnet-5-5`).
 
 ### How a chat reply is made
 
@@ -209,7 +211,7 @@ Optional settings in `.env` / Vercel: `OPENAI_MODEL` (default
    one, it answers immediately with fixed 911 or 988 guidance and skips the
    AI. This works even without an API key.
 2. Otherwise, the visitor's request count is checked (20 per 10 minutes).
-3. The conversation is sent to OpenAI with the safety instructions from
+3. The conversation is sent to Claude with the safety instructions from
    `backend/safety.py`, which forbid diagnoses, doses and made-up facts.
 
 The phrase check is a safety net, not a medical tool: it can miss
