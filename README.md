@@ -24,7 +24,7 @@ It's free, and there's nothing to install or sign up for.
 
 ## What you can do with PlainMed
 
-### 💬 Symptom Assistant
+###  Symptom Assistant
 
 Describe how you feel in your own words, for example *"I've had a headache
 around my forehead for three days."* PlainMed will:
@@ -37,7 +37,7 @@ around my forehead for three days."* PlainMed will:
 You can keep chatting to add details. Press **Clear conversation** to start
 over.
 
-### 📄 Medical Document Explainer
+###  Medical Document Explainer
 
 Got a lab report you can't make sense of? **Upload the PDF**, or switch to
 **Paste text** and paste the results from a patient portal or an email.
@@ -61,7 +61,7 @@ to a **sample blood test report**. Every name and value in it is made up.
 PDFs can be up to 4 MB and 10 pages. Scanned images and photos of documents
 can't be read yet.
 
-### 💊 Medication Assistant
+###  Medication Assistant
 
 Search for a medication by its generic name (like *ibuprofen*) or brand name
 (like *Advil*). PlainMed finds the medication's **official FDA drug label**
