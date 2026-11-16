@@ -7,7 +7,7 @@ noticing, a lab report full of abbreviations, or a medication you've been
 prescribed. It explains medical terms in everyday words and helps you work
 out what to ask your doctor or pharmacist.
 
-👉 **Try it: https://medical-ai-assistant-slosh.vercel.app**
+ **Try it: https://medical-ai-assistant-slosh.vercel.app**
 
 It's free, and there's nothing to install or sign up for.
 
