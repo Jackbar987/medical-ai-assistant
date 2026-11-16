@@ -442,25 +442,6 @@ a {
   font-size: 1.15rem;
 }
 
-/* The "not ready yet" box. */
-.notice {
-  max-width: 38rem;
-  margin-top: 2.5rem;
-  padding: 1.75rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-large);
-}
-
-.notice h2 {
-  font-size: 1.3rem;
-}
-
-.notice p {
-  margin: 0.5rem 0 1.5rem;
-  color: var(--muted);
-}
-
 /* ---------- 8b. Symptom Assistant chat ---------- */
 
 /* The chat column is narrower than the page so messages stay easy to read. */
